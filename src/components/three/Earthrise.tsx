@@ -115,7 +115,7 @@ export function Earthrise() {
     const moon = ground(lite);
     scene.add(moon);
 
-    const EARTH = new THREE.Vector3(5, 14.5, -72), ER = 15;
+    const EARTH = new THREE.Vector3(5, 12.5, -72), ER = 14;
     const earth = planet("earth", ER, lite ? 96 : 160);
     (earth.material as THREE.MeshStandardMaterial).roughness = 0.85;
     earth.position.copy(EARTH);
