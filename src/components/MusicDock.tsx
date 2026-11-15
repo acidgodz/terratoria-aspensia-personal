@@ -25,6 +25,20 @@ export function TrackBadge({ track, size = 28 }: { track: Track; size?: number }
         <path d="M24 5l2.5 1-1 2.5" fill="none" stroke="#e9ecf1" strokeWidth="1.4" strokeLinecap="round" />
       </svg>
     );
+  if (track.icon === "earthrise")
+    return (
+      <svg {...box} viewBox="0 0 32 32" aria-hidden="true" className="shrink-0">
+        <rect width="32" height="32" rx="7" fill="#05070c" />
+        <circle cx="17" cy="14" r="9" fill="#1f5fae" />
+        <path d="M10 10c3-2 6 0 8-2s5 1 6 3c-2 1-4 0-6 2s-5 1-8-3zM13 17c2 0 3 2 6 1s3 2 2 3c-3 1-6 0-8-4z" fill="#eef4ff" opacity="0.9" />
+        <circle cx="17" cy="14" r="9.6" fill="none" stroke="#7cc4ff" strokeWidth="1" opacity="0.8" />
+        <path d="M0 24c6-3 11-1 16-2s11-2 16 0v10H0z" fill="#9a9a9e" />
+        <path d="M0 24c6-3 11-1 16-2s11-2 16 0" fill="none" stroke="#e4e4e8" strokeWidth="1" />
+        <ellipse cx="9" cy="28" rx="3" ry="1" fill="#6e6e74" />
+        <ellipse cx="23" cy="27" rx="2" ry="0.7" fill="#6e6e74" />
+        <circle cx="27" cy="5" r="0.7" fill="#fff" /><circle cx="5" cy="7" r="0.5" fill="#fff" />
+      </svg>
+    );
   if (track.icon === "runner")
     return (
       <svg {...box} viewBox="0 0 32 32" aria-hidden="true" className="shrink-0">

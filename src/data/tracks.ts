@@ -1,9 +1,9 @@
 // Theme songs for Settings. ALPHA is synthesised in the browser; the others play through YouTube's own
 // embedded player (visible, as YouTube requires), so no audio file is copied or hosted here.
-// Three themed songs also change the home page backdrop; every other page stays the same.
+// Four themed songs also change the home page backdrop; every other page stays the same.
 
-export type Scene = "solar" | "blackhole" | "tauceti" | "runner";
-export type TrackIcon = "runner" | "blackhole" | "tauceti";
+export type Scene = "solar" | "blackhole" | "tauceti" | "runner" | "earthrise";
+export type TrackIcon = "runner" | "blackhole" | "tauceti" | "earthrise";
 
 export interface Track {
   id: string;
@@ -116,6 +116,20 @@ export const TRACKS: Track[] = [
     youtube: "qN4ooNx77u0",
     scene: "tauceti",
     sceneNote: { en: "Home page becomes the Tau Ceti system, with a ship orbiting the green world Tau Ceti e, and the title reads HAIL MARY.", km: "ទំព័រដើមប្រែជាប្រព័ន្ធ Tau Ceti ដែលមានយានហោះជុំវិញភពពណ៌បៃតង Tau Ceti e ហើយចំណងជើងប្តូរជា HAIL MARY។" },
+  },
+  {
+    id: "edgerunners",
+    label: "EDGERUNNERS | STAY AT YOUR HOUSE",
+    icon: "earthrise",
+    title: "I Really Want to Stay At Your House",
+    artist: "Rosa Walton",
+    credit: {
+      en: "Music: \"I Really Want to Stay At Your House\" by Rosa Walton (with Hallie Coggins), from the Cyberpunk 2077 soundtrack (CD PROJEKT RED), featured in the anime Cyberpunk: Edgerunners (Studio Trigger, CD PROJEKT RED, Netflix). Official music video uploaded by Netflix.",
+      km: "តន្ត្រី៖ \"I Really Want to Stay At Your House\" ដោយ Rosa Walton (ជាមួយ Hallie Coggins) ពីបទភ្លេង Cyberpunk 2077 (CD PROJEKT RED) ដែលបង្ហាញក្នុងគំនូរជីវចល Cyberpunk: Edgerunners (Studio Trigger, CD PROJEKT RED, Netflix)។ វីដេអូតន្ត្រីផ្លូវការបង្ហោះដោយ Netflix។",
+    },
+    youtube: "KvMY1uzSC1E",
+    scene: "earthrise",
+    sceneNote: { en: "Home page moves to the surface of the Moon, with Earth hanging over the horizon.", km: "ទំព័រដើមផ្លាស់ទៅលើផ្ទៃព្រះច័ន្ទ ដោយមានផែនដីព្យួរនៅលើជើងមេឃ។" },
   },
 ];
 

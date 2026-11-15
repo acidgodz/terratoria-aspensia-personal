@@ -33,6 +33,10 @@ const TauCeti = dynamic(
   () => import("@/components/three/TauCeti").then((m) => m.TauCeti),
   { ssr: false },
 );
+const Earthrise = dynamic(
+  () => import("@/components/three/Earthrise").then((m) => m.Earthrise),
+  { ssr: false },
+);
 const GeoRunner = dynamic(
   () => import("@/components/GeoRunner").then((m) => m.GeoRunner),
   { ssr: false },
@@ -244,6 +248,8 @@ export default function Home() {
         <TauCeti amaze={amaze} />
       ) : scene === "runner" ? (
         <GeoRunner />
+      ) : scene === "earthrise" ? (
+        <Earthrise />
       ) : (
         <SolarSystem />
       )}
