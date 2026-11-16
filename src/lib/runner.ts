@@ -16,3 +16,42 @@ export const arc = (height: number, duration: number, s: number) => {
   const p = Math.min(1, Math.max(0, s / duration));
   return 4 * height * p * (1 - p);
 };
+
+/** One corner of the wave section's zigzag, in cube sizes: `u` along the run, `h` above the floor. */
+export interface WavePoint { u: number; h: number }
+export const WAVE_GAP = 1.5; // half the corridor height around the arrow, in cube sizes
+const WAVE_LOW = 1.7, WAVE_HIGH = 5.6;
+
+/**
+ * The wave section's path: it leaves the floor, zigzags at 45° (each leg 1.5–4.5 cube sizes) between WAVE_LOW and
+ * WAVE_HIGH, and comes back down to rest on the floor (h = 0.5) by `length`. `rnd` returns 0–1.
+ */
+export function wavePath(length: number, rnd: () => number): WavePoint[] {
+  const pts: WavePoint[] = [{ u: 0, h: 0.5 }, { u: 1, h: 0.5 }];
+  let u = 1, h = 0.5, up = true;
+  const land = length - 2;
+  while (true) {
+    const target = up ? WAVE_LOW + 1.2 + rnd() * (WAVE_HIGH - WAVE_LOW - 1.2) : WAVE_LOW + rnd() * Math.max(0, h - WAVE_LOW - 1.5);
+    const leg = Math.max(1.5, Math.min(4.5, Math.abs(target - h)));
+    const nh = up ? Math.min(WAVE_HIGH, h + leg) : Math.max(WAVE_LOW, h - leg);
+    // Stop zigzagging when the descent to the floor would no longer fit before `land`.
+    if (u + Math.abs(nh - h) + (nh - 0.5) > land) break;
+    u += Math.abs(nh - h);
+    h = nh;
+    pts.push({ u, h });
+    up = !up;
+  }
+  u += h - 0.5;
+  pts.push({ u, h: 0.5 }, { u: Math.max(u, length), h: 0.5 });
+  return pts;
+}
+
+/** Height of the path at `u` (flat at the ends). */
+export function waveHeight(path: WavePoint[], u: number) {
+  if (u <= path[0].u) return path[0].h;
+  for (let i = 1; i < path.length; i++) {
+    const a = path[i - 1], b = path[i];
+    if (u <= b.u) return b.u === a.u ? b.h : a.h + ((b.h - a.h) * (u - a.u)) / (b.u - a.u);
+  }
+  return path[path.length - 1].h;
+}

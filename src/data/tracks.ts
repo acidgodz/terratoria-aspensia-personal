@@ -93,7 +93,7 @@ export const TRACKS: Track[] = [
     credit: { en: "Music: \"Flow\" by Creo.", km: "តន្ត្រី៖ \"Flow\" ដោយ Creo។" },
     youtube: "MM87r7GjzW8",
     scene: "runner",
-    sceneNote: { en: "Home page becomes a black-and-white geometry run: a cube leaps spike after spike under a glowing orb, pulsing to the beat.", km: "ទំព័រដើមប្រែជាការរត់ធរណីមាត្រពណ៌ស-ខ្មៅ៖ គូបលោតរំលងបន្លាម្តងមួយៗ ក្រោមដួងពន្លឺ តាមចង្វាក់ភ្លេង។" },
+    sceneNote: { en: "Home page becomes a black-and-white geometry run: it builds, drops into a faster section that flips black and white on the beat, then a portal turns the cube into an arrow zigzagging through a spiked corridor.", km: "ទំព័រដើមប្រែជាការរត់ធរណីមាត្រពណ៌ស-ខ្មៅ៖ វាកើនឡើង ធ្លាក់ចូលផ្នែកលឿនជាងមុន ដែលប្តូរពណ៌ស-ខ្មៅតាមចង្វាក់ បន្ទាប់មកច្រកទ្វារប្តូរគូបទៅជាព្រួញហោះរវៀចរវាចកាត់ច្រកដែលមានបន្លា។" },
   },
   {
     id: "interstellar",

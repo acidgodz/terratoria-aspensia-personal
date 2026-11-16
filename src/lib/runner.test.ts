@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { arc, jumpFor } from "./runner";
+import { arc, jumpFor, WAVE_GAP, waveHeight, wavePath } from "./runner";
 
 describe("runner jump", () => {
   const unit = 30, speed = unit * 9;
@@ -22,6 +22,30 @@ describe("runner jump", () => {
         }
         expect(speed * j.duration - unit).toBeGreaterThan(gap + n * unit); // lands past the last spike
       }
+    }
+  });
+});
+
+describe("wave path", () => {
+  let seed = 3;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647), seed / 2147483647);
+  test("zigzags at 45 degrees inside the corridor band and lands on the floor by the end", () => {
+    for (let k = 0; k < 50; k++) {
+      const len = 60 + k * 3;
+      const p = wavePath(len, rnd);
+      expect(p[0].h).toBe(0.5);
+      expect(p[p.length - 1].h).toBe(0.5);
+      expect(p[p.length - 1].u).toBeLessThanOrEqual(len + 1e-9);
+      expect(p.length).toBeGreaterThan(6);
+      for (let i = 1; i < p.length; i++) {
+        const du = p[i].u - p[i - 1].u, dh = Math.abs(p[i].h - p[i - 1].h);
+        expect(du).toBeGreaterThanOrEqual(0);
+        if (dh > 0) expect(Math.abs(du - dh)).toBeLessThan(1e-9); // 45° legs
+        expect(p[i].h).toBeLessThanOrEqual(5.6 + 1e-9);
+        // The corridor floor (h − WAVE_GAP) never cuts below the ground in mid-flight.
+        if (i > 1 && i < p.length - 2) expect(p[i].h - WAVE_GAP).toBeGreaterThanOrEqual(0);
+      }
+      expect(waveHeight(p, len / 2)).toBeGreaterThan(0.5);
     }
   });
 });
