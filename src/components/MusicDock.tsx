@@ -68,6 +68,20 @@ function Icon({ d, size = 14 }: { d: string; size?: number }) {
     </svg>
   );
 }
+// Player layout the visitor chose (position, see-through level, mini size), kept between visits.
+type Layout = { x: number | null; y: number | null; fade: number; mini: boolean };
+const LAYOUT_KEY = "terratoria.musicLayout";
+const FADES = [1, 0.7, 0.45]; // see-through steps; hovering or focusing the player always shows it fully
+const readLayout = (): Layout => {
+  try {
+    const l = JSON.parse(localStorage.getItem(LAYOUT_KEY) ?? "{}");
+    return { x: typeof l.x === "number" ? l.x : null, y: typeof l.y === "number" ? l.y : null, fade: FADES.includes(l.fade) ? l.fade : 1, mini: !!l.mini };
+  } catch {
+    return { x: null, y: null, fade: 1, mini: false };
+  }
+};
+const clampTo = (v: number, size: number, room: number) => Math.min(Math.max(8, v), Math.max(8, room - size - 8));
+
 const PLAY = "M4 2.5v11l9-5.5z", PAUSE = "M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z", PREV = "M3 3h2v10H3zM14 3v10L6 8z", NEXT = "M11 3h2v10h-2zM2 3v10l8-5z";
 
 /**
@@ -88,6 +102,61 @@ export function MusicDock() {
   const yt = !file && !!track.youtube;
   const level = muted ? 0 : volume;
   const lastVol = useRef(0.7);
+  const dock = useRef<HTMLElement>(null);
+  const [layout, setLayoutState] = useState<Layout>({ x: null, y: null, fade: 1, mini: false });
+  const setLayout = (l: Layout) => {
+    setLayoutState(l);
+    try {
+      localStorage.setItem(LAYOUT_KEY, JSON.stringify(l));
+    } catch {
+      // storage blocked: the layout just lasts for this visit
+    }
+  };
+  useEffect(() => setLayoutState(readLayout()), []);
+
+  // Keep a moved player on screen when the window shrinks or the player changes size.
+  useEffect(() => {
+    const fit = () => {
+      const el = dock.current;
+      if (!el || layout.x === null || layout.y === null) return;
+      const x = clampTo(layout.x, el.offsetWidth, window.innerWidth), y = clampTo(layout.y, el.offsetHeight, window.innerHeight);
+      if (x !== layout.x || y !== layout.y) setLayoutState((l) => ({ ...l, x, y }));
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [layout, open]);
+
+  // Drag by the grip (pointer capture keeps the drag going over the YouTube frame); arrow keys nudge it.
+  const moveTo = (x: number, y: number, save: boolean) => {
+    const el = dock.current;
+    if (!el) return;
+    const next = { ...layout, x: clampTo(x, el.offsetWidth, window.innerWidth), y: clampTo(y, el.offsetHeight, window.innerHeight) };
+    if (save) setLayout(next);
+    else setLayoutState(next);
+  };
+  const drag = useRef<{ dx: number; dy: number } | null>(null);
+  const onGripDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    const r = dock.current?.getBoundingClientRect();
+    if (!r) return;
+    drag.current = { dx: e.clientX - r.left, dy: e.clientY - r.top };
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+  const onGripMove = (e: React.PointerEvent<HTMLButtonElement>) => drag.current && moveTo(e.clientX - drag.current.dx, e.clientY - drag.current.dy, false);
+  const onGripUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!drag.current) return;
+    drag.current = null;
+    e.currentTarget.releasePointerCapture(e.pointerId);
+    setLayout(layout); // save where the drag ended
+  };
+  const onGripKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    const r = dock.current?.getBoundingClientRect();
+    if (!d || !r) return;
+    e.preventDefault();
+    const n = e.shiftKey ? 80 : 20;
+    moveTo(r.left + d[0] * n, r.top + d[1] * n, true);
+  };
 
   // New song: start fresh and playing.
   useEffect(() => {
@@ -154,10 +223,32 @@ export function MusicDock() {
   const isOn = playing && (open || file);
 
   return (
-    <aside className={`music-dock no-print ${open ? "" : "is-closed"}`} aria-label={tx("Music player", "កម្មវិធីចាក់តន្ត្រី")}>
-      <div className="flex items-center gap-2 px-2.5 py-2">
-        <TrackBadge track={track} size={24} />
-        <span className="min-w-0 flex-1">
+    <aside
+      ref={dock}
+      className={`music-dock no-print ${open ? "" : "is-closed"} ${layout.mini ? "is-mini" : ""}`}
+      aria-label={tx("Music player", "កម្មវិធីចាក់តន្ត្រី")}
+      style={{
+        ["--fade" as string]: layout.fade,
+        ...(layout.x !== null && layout.y !== null ? { left: layout.x, top: layout.y, right: "auto", bottom: "auto" } : {}),
+      }}
+    >
+      <div className="flex items-center gap-1.5 px-2 py-2">
+        <button
+          type="button"
+          className="music-btn music-grip"
+          aria-label={tx("Move player: drag, or use the arrow keys. Double-click to put it back.", "ផ្លាស់ទីកម្មវិធីចាក់៖ អូស ឬប្រើគ្រាប់ចុចព្រួញ។ ចុចពីរដងដើម្បីដាក់វាត្រឡប់។")}
+          title={tx("Drag to move · double-click to reset", "អូសដើម្បីផ្លាស់ទី · ចុចពីរដងដើម្បីកំណត់ឡើងវិញ")}
+          onPointerDown={onGripDown}
+          onPointerMove={onGripMove}
+          onPointerUp={onGripUp}
+          onPointerCancel={() => (drag.current = null)}
+          onKeyDown={onGripKey}
+          onDoubleClick={() => setLayout({ ...layout, x: null, y: null })}
+        >
+          <Icon d="M5 3h2v2H5zM9 3h2v2H9zM5 7h2v2H5zM9 7h2v2H9zM5 11h2v2H5zM9 11h2v2H9z" />
+        </button>
+        <TrackBadge track={track} size={22} />
+        <span className="music-label min-w-0 flex-1">
           <span className="block truncate text-[11px] font-semibold tracking-wide" style={track.color ? { color: track.color } : undefined}>
             {track.label}
           </span>
@@ -170,6 +261,28 @@ export function MusicDock() {
             <Icon d={isOn ? PAUSE : PLAY} />
           </button>
         )}
+        <button
+          type="button"
+          className="music-btn"
+          aria-label={tx(`See-through: ${Math.round(layout.fade * 100)}%`, `ភាពមើលឃើញ៖ ${Math.round(layout.fade * 100)}%`)}
+          title={tx("Make the player see-through (it shows fully while you point at it)", "ធ្វើឱ្យកម្មវិធីចាក់ថ្លា (វាបង្ហាញពេញពេលអ្នកចង្អុលលើវា)")}
+          onClick={() => setLayout({ ...layout, fade: FADES[(FADES.indexOf(layout.fade) + 1) % FADES.length] })}
+        >
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+            <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" strokeWidth="1.5" />
+            <path d="M8 2a6 6 0 010 12z" fill="currentColor" opacity={layout.fade} />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className="music-btn"
+          aria-pressed={layout.mini}
+          aria-label={layout.mini ? tx("Full-size player", "កម្មវិធីចាក់ទំហំពេញ") : tx("Mini player", "កម្មវិធីចាក់តូច")}
+          title={layout.mini ? tx("Full-size player", "កម្មវិធីចាក់ទំហំពេញ") : tx("Mini player", "កម្មវិធីចាក់តូច")}
+          onClick={() => setLayout({ ...layout, mini: !layout.mini })}
+        >
+          <Icon d={layout.mini ? "M2 2h12v12H2zM3.5 3.5v9h9v-9z" : "M7 7h7v7H7zM8.5 8.5v4h4v-4zM2 2h9v2H4v7H2z"} />
+        </button>
         <button
           type="button"
           className="music-btn"
@@ -217,6 +330,7 @@ export function MusicDock() {
               {clock(time.cur)} / {clock(time.dur)}
             </span>
           </div>
+          {!layout.mini && (<>
           <input
             type="range"
             className="music-range mt-2 w-full"
@@ -257,6 +371,7 @@ export function MusicDock() {
             />
           </div>
           <p className="mt-1.5 text-[10px] leading-snug text-muted">{track.credit[lang]}</p>
+          </>)}
         </div>
       )}
     </aside>
