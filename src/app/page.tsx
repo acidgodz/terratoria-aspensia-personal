@@ -270,13 +270,13 @@ export default function Home() {
               PROJECT:
             </span>
             <SplitText
-              key={scene === "tauceti" ? "hail" : "terra"}
-              text={scene === "tauceti" ? "HAIL MARY" : "Terratoria"}
+              key={scene === "tauceti" ? "hail" : scene === "earthrise" ? "edge" : "terra"}
+              text={scene === "tauceti" ? "HAIL MARY" : scene === "earthrise" ? "EDGERUNNERS" : "Terratoria"}
               tag="span"
               trigger="load"
               textAlign="left"
               delay={50}
-              className="mt-2 !block text-6xl font-semibold tracking-tight sm:text-7xl"
+              className={`mt-2 !block text-6xl font-semibold tracking-tight sm:text-7xl ${scene === "earthrise" ? "is-edge" : ""}`}
             />
           </h1>
           <p data-hero="line" className="mt-5 text-xl text-text/90 sm:text-2xl">

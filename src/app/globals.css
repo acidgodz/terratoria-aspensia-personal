@@ -894,6 +894,15 @@ summary::marker {
 .hero-title .split-char {
   color: #f4f4f6;
   }
+/* EDGERUNNERS theme: the title in the show's signal yellow, slightly smaller so the longer word fits. */
+.hero-title .is-edge .split-char,
+.hero-title .split-parent.is-edge .split-char {
+  color: #fcee0a;
+  text-shadow: 0 0 28px rgba(252, 238, 10, 0.25);
+}
+.hero-title .split-parent.is-edge {
+  font-size: clamp(3rem, 1.6rem + 6.2vw, 6.6rem);
+}
 .hero-title .split-parent {
   font-size: clamp(4rem, 2.2rem + 8vw, 8.5rem);
   line-height: 0.95;
